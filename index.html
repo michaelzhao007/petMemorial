@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Memory of Java</title>
+    <style>
+        /* 基础设置 */
+        :root {
+            --primary-color: #5d4037; /* 深棕色 */
+            --accent-color: #8d6e63;  /* 浅棕色 */
+            --bg-color: #fdfbf7;      /* 米白色背景 */
+            --text-color: #4a4a4a;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* 动画定义 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 1.5s ease-out forwards;
+        }
+
+        /* 头部 Hero Section */
+        header {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #ffffff 0%, #fdfbf7 100%);
+            padding: 20px;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 300;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+        }
+
+        .epitaph {
+            font-size: 1.5rem;
+            font-style: italic;
+            color: var(--accent-color);
+            margin-top: 10px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .epitaph::before, .epitaph::after {
+            content: "~";
+            margin: 0 10px;
+            color: #d7ccc8;
+        }
+
+        .scroll-down {
+            position: absolute;
+            bottom: 40px;
+            font-size: 2rem;
+            color: var(--accent-color);
+            animation: bounce 2s infinite;
+            cursor: pointer;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        /* 画廊部分 */
+        .gallery-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .gallery-intro {
+            text-align: center;
+            margin-bottom: 60px;
+            font-size: 1.1rem;
+            color: #666;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 瀑布流/网格布局 */
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            background-color: #eee; /* 占位背景 */
+            aspect-ratio: 3/4; /* 默认比例，图片加载后会自适应 */
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+            display: block;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Lightbox (点击放大) */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.95);
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .lightbox.active {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .lightbox img {
+            max-width: 90%;
+            max-height: 90vh;
+            border-radius: 5px;
+            box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 30px;
+            right: 40px;
+            font-size: 3rem;
+            color: var(--primary-color);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-lightbox:hover {
+            color: #000;
+        }
+
+        /* 底部 */
+        footer {
+            text-align: center;
+            padding: 50px 20px;
+            font-size: 0.9rem;
+            color: #888;
+            border-top: 1px solid #eee;
+            margin-top: 50px;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 3rem;
+            }
+            .epitaph {
+                font-size: 1.2rem;
+                padding: 0 10px;
+            }
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 头部区域 -->
+    <header>
+        <div class="fade-in">
+            <h1>Java</h1>
+            <p class="epitaph">Small pub with fearless heart</p>
+        </div>
+        <div class="scroll-down" onclick="document.getElementById('gallery').scrollIntoView({behavior: 'smooth'})">
+            ⌄
+        </div>
+    </header>
+
+    <!-- 画廊区域 -->
+    <section id="gallery" class="gallery-section">
+        <div class="gallery-intro fade-in">
+            <p>你永远是我们心中最勇敢的小家伙。<br>每一个眼神，每一次奔跑，都不仅仅是回忆，而是爱的延续。</p>
+        </div>
+
+        <div class="gallery-grid">
+            <!-- 照片 1: 7d9a94a209d0bfb6371911c9bb2c4efb.JPG (趴在地毯上) -->
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="7d9a94a209d0bfb6371911c9bb2c4efb.JPG" alt="Java resting on the rug" loading="lazy">
+            </div>
+
+            <!-- 照片 2: 2e84f211e43fe8fe31ac78b53f6f6908 2.JPG (阳光下的特写) -->
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="2e84f211e43fe8fe31ac78b53f6f6908 2.JPG" alt="Java in the sunlight" loading="lazy">
+            </div>
+
+            <!-- 照片 3: 20cb46d0183426a00e8d23c1942f103f.jpg (时代广场/城市夜景) -->
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="20cb46d0183426a00e8d23c1942f103f.jpg" alt="Java in the city" loading="lazy">
+            </div>
+
+            <!-- 照片 4: 0c2be65cb0441eefcde627cbc1887c03.JPG (窗前看风景) -->
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="0c2be65cb0441eefcde627cbc1887c03.JPG" alt="Java looking out the window" loading="lazy">
+            </div>
+
+            <!-- 照片 5: b31ed2f5d2aef0d258ad0eea1155388e 2.JPG (坐在秋千上) -->
+            <div class="gallery-item" onclick="openLightbox(this)">
+                <img src="b31ed2f5d2aef0d258ad0eea1155388e 2.JPG" alt="Java on a swing" loading="lazy">
+            </div>
+        </div>
+    </section>
+
+    <!-- 底部 -->
+    <footer>
+        <p>&copy; Forever Java. Loved and Remembered.</p>
+    </footer>
+
+    <!-- 图片放大显示层 -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <span class="close-lightbox">&times;</span>
+        <img id="lightbox-img" src="" alt="Enlarged photo">
+    </div>
+
+    <script>
+        // 图片放大功能
+        function openLightbox(element) {
+            const imgSrc = element.querySelector('img').src;
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            
+            lightboxImg.src = imgSrc;
+            lightbox.classList.add('active');
+            document.body.style.overflow = 'hidden'; // 禁止背景滚动
+        }
+
+        function closeLightbox(event) {
+            // 点击图片本身不关闭，点击背景或关闭按钮才关闭
+            if (event.target.id === 'lightbox-img') return;
+            
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+
+        // 简单的滚动淡入效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('fade-in');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.gallery-item').forEach(item => {
+                item.style.opacity = '0'; // 初始隐藏
+                item.style.animation = 'none'; // 重置动画
+                observer.observe(item);
+            });
+            
+            // 为画廊项目添加淡入类
+             document.querySelectorAll('.gallery-item').forEach((item, index) => {
+                item.style.animation = `fadeIn 0.8s ease-out forwards ${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>
